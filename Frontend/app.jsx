@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+// This line now directly points to your live backend server on Render.
+const API_URL = 'https://staynstray-backend.onrender.com';
+
 // Main App Component - The root of our application
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -66,6 +69,7 @@ export default function App() {
   return <div className="bg-gray-50 min-h-screen font-sans">{renderPage()}</div>;
 }
 
+// ... (All other components remain the same as the last version) ...
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // +                         HOME PAGE & COMPONENTS                     +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -256,7 +260,7 @@ const LoginForm = ({ onLoginSuccess, toggleView }) => {
         e.preventDefault();
         setMessage('');
         try {
-            const response = await fetch('http://localhost:5000/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch(`${API_URL}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
             const data = await response.json();
             if (response.ok) {
                 onLoginSuccess(data.user, data.token);
@@ -298,7 +302,7 @@ const RegistrationForm = ({ toggleView }) => {
         e.preventDefault();
         setMessage('');
         try {
-            const response = await fetch('http://localhost:5000/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch(`${API_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
             const data = await response.json();
             if (response.ok) {
                 setMessage('Success! You can now sign in.');
@@ -354,7 +358,7 @@ const HotelsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchHotels = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/hotels');
+                const response = await fetch(`${API_URL}/api/hotels`);
                 const data = await response.json();
                 setHotels(data);
             } catch (error) {
@@ -528,7 +532,7 @@ const FlightsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchFlights = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/flights');
+                const response = await fetch(`${API_URL}/api/flights`);
                 const data = await response.json();
                 setFlights(data);
             } catch (error) {
@@ -656,7 +660,7 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
                              </div>
                         </fieldset>
                         <div className="flex justify-between items-center pt-4">
-                            <button onClick={() => navigateTo('flights')} className="text-gray-600 font-semibold hover:text-blue-600 transition">← Back to Selection</button>
+                            <button type="button" onClick={() => navigateTo('flights')} className="text-gray-600 font-semibold hover:text-blue-600 transition">← Back to Selection</button>
                             <button type="submit" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">Continue to Payment →</button>
                         </div>
                     </form>
@@ -679,7 +683,7 @@ const TrainsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchTrains = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/trains');
+                const response = await fetch(`${API_URL}/api/trains`);
                 const data = await response.json();
                 setTrains(data);
             } catch (error) {
@@ -748,7 +752,7 @@ const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
         setMessage('');
         try {
             const token = localStorage.getItem('staynstray_token');
-            const response = await fetch('http://localhost:5000/api/bookings', { 
+            const response = await fetch(`${API_URL}/api/bookings`, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
                 body: JSON.stringify(bookingDetails) 
@@ -914,7 +918,7 @@ const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
                 return;
             }
             try {
-                const response = await fetch('http://localhost:5000/api/my-bookings', {
+                const response = await fetch(`${API_URL}/api/my-bookings`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) { throw new Error('Failed to fetch bookings.'); }
@@ -1063,3 +1067,4 @@ const FormInput = ({ label, name, type = 'text', value, onChange, required, clas
         <input type={type} name={name} value={value} onChange={onChange} required={required} placeholder={placeholder} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 h-12"/>
     </div>
 );
+
