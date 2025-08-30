@@ -1,3 +1,6 @@
+// This line MUST be at the very top
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -5,21 +8,30 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
-// **MODIFIED FOR RENDER**
-// Render provides the PORT environment variable.
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secret-key-that-is-long-and-secure';
-
-// --- IMPORTANT: This must be set in Render's Environment Variables ---
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
 
-// Explicitly allow requests only from your live frontend URL
+// ** PRODUCTION-READY CORS CONFIGURATION **
+// Allows your local machine and your live Vercel app to connect.
+const allowedOrigins = [
+  'http://localhost:5173', // Your local Vite dev server
+  'https://stray-n-stray-project.vercel.app' // Your live Vercel URL
+];
+
 const corsOptions = {
-  origin: 'https://stray-n-stray-project.vercel.app',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   optionsSuccessStatus: 200
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -35,7 +47,6 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
 
 // --- MOCK DATA ---
 const hotelsData = [
@@ -57,10 +68,8 @@ const trainsData = [
 
 let db;
 
-// --- API ROUTES (abbreviated for clarity) ---
-app.get('/', (req, res) => {
-    res.send('StayNStray Backend is running!');
-});
+// --- API ROUTES ---
+app.get('/', (req, res) => res.send('StayNStray Backend is running!'));
 
 app.post('/api/register', async (req, res) => {
     try {
@@ -116,21 +125,19 @@ app.get('/api/my-bookings', authenticateToken, async (req, res) => {
     } catch (error) { res.status(500).json({ message: "Server error." }); }
 });
 
-
 // --- Connect to MongoDB and Start Server ---
 async function connectToDbAndStartServer() {
     if (!MONGO_URI) {
-        console.error("FATAL ERROR: MONGO_URI environment variable is not set on the server.");
-        process.exit(1); // Exit if the database connection string is missing
+        console.error("FATAL ERROR: MONGO_URI is not defined. Check your .env file or Render environment variables.");
+        process.exit(1);
     }
-    
     const client = new MongoClient(MONGO_URI);
-
     try {
         await client.connect();
         db = client.db("StayNStrayDB");
         console.log("Successfully connected to MongoDB!");
         
+        // ** RENDER-READY SERVER START **
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server is running on port ${PORT}`);
         });
@@ -141,3 +148,4 @@ async function connectToDbAndStartServer() {
 }
 
 connectToDbAndStartServer();
+
