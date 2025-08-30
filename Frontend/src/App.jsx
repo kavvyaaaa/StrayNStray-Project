@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
+// ** PRODUCTION-READY API URL **
+// This uses the Vercel environment variable for the live site,
+// but falls back to localhost for local development. This is the correct way.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Main App Component - The root of our application
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -66,6 +71,7 @@ export default function App() {
   return <div className="bg-gray-50 min-h-screen font-sans">{renderPage()}</div>;
 }
 
+// ... (Rest of the components are identical to the previous correct version) ...
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // +                         HOME PAGE & COMPONENTS                     +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -212,11 +218,6 @@ const CallToAction = ({ navigateTo }) => (
     </section>
 );
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                  AUTHENTICATION PAGE & COMPONENTS                +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const AuthPage = ({ navigateTo, onLoginSuccess }) => {
     const [isLoginView, setIsLoginView] = useState(true);
     const toggleView = () => setIsLoginView(!isLoginView);
@@ -256,7 +257,7 @@ const LoginForm = ({ onLoginSuccess, toggleView }) => {
         e.preventDefault();
         setMessage('');
         try {
-            const response = await fetch('http://localhost:5000/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch(`${API_URL}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
             const data = await response.json();
             if (response.ok) {
                 onLoginSuccess(data.user, data.token);
@@ -298,7 +299,7 @@ const RegistrationForm = ({ toggleView }) => {
         e.preventDefault();
         setMessage('');
         try {
-            const response = await fetch('http://localhost:5000/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch(`${API_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
             const data = await response.json();
             if (response.ok) {
                 setMessage('Success! You can now sign in.');
@@ -342,11 +343,6 @@ const RegistrationForm = ({ toggleView }) => {
     );
 };
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                         HOTELS PAGE & COMPONENTS                 +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const HotelsPage = ({ navigateTo, user, onLogout }) => {
     const [hotels, setHotels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -354,12 +350,12 @@ const HotelsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchHotels = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/hotels');
+                const response = await fetch(`${API_URL}/api/hotels`);
                 const data = await response.json();
                 setHotels(data);
             } catch (error) {
                 console.log("Could not fetch hotels, using mock data.");
-                setHotels([ // Mock data for previewing without a running backend
+                setHotels([
                     { _id: '1', name: 'The Grand Plaza Hotel', location: 'Manhattan, New York', price: 23999, rating: 4.8, amenities: ['Free WiFi', 'Pool', 'Gym'], imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop', description: 'Luxury hotel in the heart of Manhattan with stunning city views and world-class amenities.' },
                     { _id: '2', name: 'Boutique Central Hotel', location: 'Midtown, New York', price: 14999, rating: 4.5, amenities: ['Free WiFi', 'Breakfast', 'Concierge'], imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop', description: 'Charming boutique hotel with personalized service and unique design in the heart of the city.' },
                     { _id: '3', name: 'Business Suites Manhattan', location: 'Financial District, New York', price: 19500, rating: 4.3, amenities: ['Free WiFi', 'Business Center', 'Gym'], imageUrl: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070&auto=format&fit=crop', description: 'Modern business hotel perfect for corporate travelers with excellent meeting facilities.' },
@@ -436,11 +432,6 @@ const HotelCard = ({ hotel, onViewDetails }) => (
     </div>
 );
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                  HOTEL RESERVATION PAGE & COMPONENTS             +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const HotelReservationPage = ({ navigateTo, user, onLogout, hotel }) => {
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '', phone: '',
@@ -465,7 +456,7 @@ const HotelReservationPage = ({ navigateTo, user, onLogout, hotel }) => {
         navigateTo('payment', bookingDetails);
     };
 
-    if (!hotel) { // Fallback if no hotel is selected
+    if (!hotel) {
         return (
             <div className="flex flex-col min-h-screen">
                 <Header navigateTo={navigateTo} user={user} onLogout={onLogout} />
@@ -516,11 +507,6 @@ const HotelReservationPage = ({ navigateTo, user, onLogout, hotel }) => {
     );
 };
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                       FLIGHTS PAGE & COMPONENTS                  +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const FlightsPage = ({ navigateTo, user, onLogout }) => {
     const [flights, setFlights] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -528,7 +514,7 @@ const FlightsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchFlights = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/flights');
+                const response = await fetch(`${API_URL}/api/flights`);
                 const data = await response.json();
                 setFlights(data);
             } catch (error) {
@@ -589,11 +575,6 @@ const FlightCard = ({ flight, onSelect }) => (
         </div>
     </div>
 );
-
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                    TRAVELER DETAILS PAGE                         +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
      const [formData, setFormData] = useState({
@@ -656,7 +637,7 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
                              </div>
                         </fieldset>
                         <div className="flex justify-between items-center pt-4">
-                            <button onClick={() => navigateTo('flights')} className="text-gray-600 font-semibold hover:text-blue-600 transition">← Back to Selection</button>
+                            <button type="button" onClick={() => navigateTo('flights')} className="text-gray-600 font-semibold hover:text-blue-600 transition">← Back to Selection</button>
                             <button type="submit" className="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">Continue to Payment →</button>
                         </div>
                     </form>
@@ -667,11 +648,6 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
     );
 };
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                        TRAINS PAGE & COMPONENTS                  +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const TrainsPage = ({ navigateTo, user, onLogout }) => {
     const [trains, setTrains] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -679,7 +655,7 @@ const TrainsPage = ({ navigateTo, user, onLogout }) => {
     useEffect(() => {
         const fetchTrains = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/trains');
+                const response = await fetch(`${API_URL}/api/trains`);
                 const data = await response.json();
                 setTrains(data);
             } catch (error) {
@@ -734,11 +710,6 @@ const TrainCard = ({ train }) => (
     </div>
 );
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                         PAYMENT PAGE & COMPONENTS                +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('');
@@ -748,7 +719,7 @@ const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
         setMessage('');
         try {
             const token = localStorage.getItem('staynstray_token');
-            const response = await fetch('http://localhost:5000/api/bookings', { 
+            const response = await fetch(`${API_URL}/api/bookings`, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
                 body: JSON.stringify(bookingDetails) 
@@ -840,11 +811,6 @@ const BookingSummary = ({ details }) => {
     );
 };
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                      PAYMENT SUCCESS PAGE                        +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
      if (!bookingReceipt) {
          return (
@@ -894,11 +860,6 @@ const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
     );
 };
 
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                         MY BOOKINGS PAGE                         +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -914,7 +875,7 @@ const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
                 return;
             }
             try {
-                const response = await fetch('http://localhost:5000/api/my-bookings', {
+                const response = await fetch(`${API_URL}/api/my-bookings`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) { throw new Error('Failed to fetch bookings.'); }
@@ -972,11 +933,6 @@ const BookingCard = ({ booking }) => {
         </div>
     );
 };
-
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +                   SHARED GLOBAL COMPONENTS                       +
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 const Header = ({ navigateTo, user, onLogout }) => {
     const handleBookingsClick = (e) => {
@@ -1064,3 +1020,4 @@ const FormInput = ({ label, name, type = 'text', value, onChange, required, clas
     </div>
 );
 
+        
