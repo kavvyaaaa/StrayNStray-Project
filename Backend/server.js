@@ -8,9 +8,9 @@ const app = express();
 // **MODIFIED FOR RENDER**
 // Render provides the PORT environment variable.
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = 'your-very-secret-key-that-is-long-and-secure';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secret-key-that-is-long-and-secure';
 
-// --- IMPORTANT: This should be set in Render's Environment Variables ---
+// --- IMPORTANT: This must be set in Render's Environment Variables ---
 const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
@@ -58,6 +58,10 @@ const trainsData = [
 let db;
 
 // --- API ROUTES (abbreviated for clarity) ---
+app.get('/', (req, res) => {
+    res.send('StayNStray Backend is running!');
+});
+
 app.post('/api/register', async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
@@ -114,19 +118,19 @@ app.get('/api/my-bookings', authenticateToken, async (req, res) => {
 
 
 // --- Connect to MongoDB and Start Server ---
-const client = new MongoClient(MONGO_URI);
 async function connectToDbAndStartServer() {
     if (!MONGO_URI) {
-        console.error("FATAL ERROR: MONGO_URI environment variable is not set.");
-        process.exit(1);
+        console.error("FATAL ERROR: MONGO_URI environment variable is not set on the server.");
+        process.exit(1); // Exit if the database connection string is missing
     }
+    
+    const client = new MongoClient(MONGO_URI);
+
     try {
         await client.connect();
         db = client.db("StayNStrayDB");
         console.log("Successfully connected to MongoDB!");
         
-        // ** MODIFIED FOR RENDER **
-        // The 'host' parameter is crucial for deployment platforms like Render.
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server is running on port ${PORT}`);
         });
