@@ -5,39 +5,39 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
-const PORT = 5000;
-const JWT_SECRET = 'your-very-secret-key-that-is-long-and-secure'; // Use a more secure key in a real project
+// **MODIFIED FOR RENDER**
+// Render provides the PORT environment variable.
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = 'your-very-secret-key-that-is-long-and-secure';
 
-// --- IMPORTANT: ADD YOUR MONGODB ATLAS CONNECTION STRING HERE ---
-// Replace the placeholder text with your actual connection string from the MongoDB Atlas dashboard.
-const MONGO_URI = "mongodb+srv://krishkorat:%40Krishkorat23523@cluster0.fqpzgqs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-let db;
+// --- IMPORTANT: This should be set in Render's Environment Variables ---
+const MONGO_URI = process.env.MONGO_URI;
 
 // --- Middleware ---
-app.use(cors()); // Allows your frontend to communicate with this backend
-app.use(express.json()); // Allows the server to understand JSON data from requests
+
+// Explicitly allow requests only from your live frontend URL
+const corsOptions = {
+  origin: 'https://stray-n-stray-project.vercel.app',
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+app.use(express.json());
 
 // --- Middleware to Authenticate JWT ---
-// This function will protect our secure routes
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Format is "Bearer TOKEN"
-
-    if (token == null) {
-        return res.status(401).json({ message: "Authentication token is required." }); // Unauthorized
-    }
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return res.sendStatus(401);
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: "Token is not valid." }); // Forbidden
-        }
-        req.user = user; // Add the decoded user payload to the request object
-        next(); // Proceed to the route handler
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
     });
 };
 
 
-// --- MOCK DATA (TEMPORARY DATABASE) ---
+// --- MOCK DATA ---
 const hotelsData = [
     { _id: new ObjectId(), name: 'The Grand Plaza Hotel', location: 'Manhattan, New York', price: 23999, rating: 4.8, amenities: ['Free WiFi', 'Pool', 'Gym'], imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop', description: 'Luxury hotel in the heart of Manhattan with stunning city views and world-class amenities.' },
     { _id: new ObjectId(), name: 'Boutique Central Hotel', location: 'Midtown, New York', price: 14999, rating: 4.5, amenities: ['Free WiFi', 'Breakfast', 'Concierge'], imageUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop', description: 'Charming boutique hotel with personalized service and unique design in the heart of the city.' },
@@ -55,61 +55,41 @@ const trainsData = [
     { _id: new ObjectId(), name: 'Shatabdi Express', from: 'Delhi', to: 'Agra', departureTime: '06:00', arrivalTime: '08:06', price: 1200 },
 ];
 
+let db;
 
-// --- API ROUTES ---
-
-// --- Authentication Routes ---
+// --- API ROUTES (abbreviated for clarity) ---
 app.post('/api/register', async (req, res) => {
     try {
         const { firstName, lastName, email, password } = req.body;
-        if (!firstName || !lastName || !email || !password) {
-            return res.status(400).json({ message: "All fields are required." });
-        }
+        if (!firstName || !lastName || !email || !password) return res.status(400).json({ message: "All fields are required." });
         const existingUser = await db.collection('users').findOne({ email });
-        if (existingUser) {
-            return res.status(409).json({ message: "Email is already in use." });
-        }
+        if (existingUser) return res.status(409).json({ message: "Email is already in use." });
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = { firstName, lastName, email, password: hashedPassword };
-        await db.collection('users').insertOne(newUser);
+        await db.collection('users').insertOne({ firstName, lastName, email, password: hashedPassword });
         res.status(201).json({ message: "User registered successfully." });
-    } catch (error) {
-        res.status(500).json({ message: "Server error during registration." });
-    }
+    } catch (error) { res.status(500).json({ message: "Server error." }); }
 });
 
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await db.collection('users').findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
+        if (!user) return res.status(404).json({ message: "User not found." });
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials." });
-        }
+        if (!isMatch) return res.status(401).json({ message: "Invalid credentials." });
         const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({
-            token,
-            user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email }
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Server error during login." });
-    }
+        res.json({ token, user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email } });
+    } catch (error) { res.status(500).json({ message: "Server error." }); }
 });
 
-// --- Public Data Routes ---
 app.get('/api/hotels', (req, res) => res.json(hotelsData));
 app.get('/api/flights', (req, res) => res.json(flightsData));
 app.get('/api/trains', (req, res) => res.json(trainsData));
 
-// --- Secure Booking Routes ---
 app.post('/api/bookings', authenticateToken, async (req, res) => {
     try {
         const bookingDetails = req.body;
-        const userId = req.user.id; // Get user ID from the authenticated token
-        
+        const userId = req.user.id;
         const bookingDocument = {
             userId: new ObjectId(userId),
             bookingType: bookingDetails.bookingType,
@@ -118,17 +98,10 @@ app.post('/api/bookings', authenticateToken, async (req, res) => {
             createdAt: new Date(),
             status: 'Confirmed'
         };
-
         const result = await db.collection('bookings').insertOne(bookingDocument);
-        
-        // Find the inserted document to return it with its new _id
         const newBooking = await db.collection('bookings').findOne({_id: result.insertedId});
-
         res.status(201).json({ message: "Booking successful!", booking: newBooking });
-    } catch (error) {
-        console.error("Booking error:", error);
-        res.status(500).json({ message: "Server error during booking." });
-    }
+    } catch (error) { res.status(500).json({ message: "Server error." }); }
 });
 
 app.get('/api/my-bookings', authenticateToken, async (req, res) => {
@@ -136,29 +109,31 @@ app.get('/api/my-bookings', authenticateToken, async (req, res) => {
         const userId = req.user.id;
         const bookings = await db.collection('bookings').find({ userId: new ObjectId(userId) }).toArray();
         res.json(bookings);
-    } catch (error) {
-        console.error("Error fetching bookings:", error);
-        res.status(500).json({ message: "Server error while fetching bookings." });
-    }
+    } catch (error) { res.status(500).json({ message: "Server error." }); }
 });
 
 
 // --- Connect to MongoDB and Start Server ---
 const client = new MongoClient(MONGO_URI);
-async function connectToDb() {
+async function connectToDbAndStartServer() {
+    if (!MONGO_URI) {
+        console.error("FATAL ERROR: MONGO_URI environment variable is not set.");
+        process.exit(1);
+    }
     try {
         await client.connect();
-        db = client.db("StayNStrayDB"); // You can name your database here
+        db = client.db("StayNStrayDB");
         console.log("Successfully connected to MongoDB!");
         
-        // Start the server only after a successful DB connection
-        app.listen(PORT, () => {
+        // ** MODIFIED FOR RENDER **
+        // The 'host' parameter is crucial for deployment platforms like Render.
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server is running on port ${PORT}`);
         });
     } catch (err) {
         console.error("Failed to connect to MongoDB", err);
-        process.exit(1); // Exit the process with an error code
+        process.exit(1);
     }
 }
 
-connectToDb();
+connectToDbAndStartServer();
