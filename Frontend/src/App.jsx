@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // ** PRODUCTION-READY API URL **
 // This uses the Vercel environment variable for the live site,
 // but falls back to localhost for local development. This is the correct way.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://straynstray.onrender.com';
 
 // Main App Component - The root of our application
 export default function App() {

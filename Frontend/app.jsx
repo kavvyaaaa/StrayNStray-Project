@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // This line now directly points to your live backend server on Render.
-const API_URL = 'https://staynstray-backend.onrender.com';
+const API_URL = 'https://straynstray.onrender.com';
 
 // Main App Component - The root of our application
 export default function App() {
