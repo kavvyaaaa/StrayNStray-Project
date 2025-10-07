@@ -48,6 +48,10 @@ export default function App() {
         return <AuthPage navigateTo={navigateTo} onLoginSuccess={handleLoginSuccess} />;
       case 'hotels':
         return <HotelsPage navigateTo={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'about':
+        return <AboutPage navigateTo={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'contact':
+        return <ContactPage navigateTo={navigateTo} user={user} onLogout={handleLogout} />;
       case 'hotelReservation':
         return <HotelReservationPage navigateTo={navigateTo} user={user} onLogout={handleLogout} hotel={pageContext} />;
       case 'flights':
@@ -85,7 +89,7 @@ const HomePage = ({ navigateTo, user, onLogout }) => (
       <PopularDestinations />
       <CallToAction navigateTo={navigateTo} />
     </main>
-    <Footer />
+    <Footer navigateTo={navigateTo} />
   </div>
 );
 
@@ -399,7 +403,7 @@ const HotelsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -556,7 +560,7 @@ const FlightsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -643,7 +647,7 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
                     </form>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -687,7 +691,7 @@ const TrainsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -781,7 +785,7 @@ const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
                      </div>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -855,7 +859,7 @@ const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
                      <button onClick={() => navigateTo('home')} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">Back to Home</button>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -908,7 +912,7 @@ const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
                      </div>
                  )}
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -973,7 +977,7 @@ const Header = ({ navigateTo, user, onLogout }) => {
     </header>
 );
 };
-const Footer = () => (
+const Footer = ({navigateTo}) => (
     <footer className="bg-gray-800 text-white">
         <div className="container mx-auto px-6 lg:px-8 py-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -984,7 +988,7 @@ const Footer = () => (
                 <div>
                     <h3 className="font-bold uppercase tracking-wider">Company</h3>
                     <ul className="mt-4 space-y-2 text-gray-400">
-                        <li><a href="#" className="hover:text-white">About Us</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('about'); }} className="hover:text-white">About Us</a></li>
                         <li><a href="#" className="hover:text-white">Careers</a></li>
                         <li><a href="#" className="hover:text-white">Press</a></li>
                     </ul>
@@ -993,7 +997,7 @@ const Footer = () => (
                      <h3 className="font-bold uppercase tracking-wider">Support</h3>
                     <ul className="mt-4 space-y-2 text-gray-400">
                         <li><a href="#" className="hover:text-white">Help Center</a></li>
-                        <li><a href="#" className="hover:text-white">Contact Us</a></li>
+                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo('contact'); }} className="hover:text-white">Contact Us</a></li>
                         <li><a href="#" className="hover:text-white">Safety</a></li>
                     </ul>
                 </div>
@@ -1011,6 +1015,56 @@ const Footer = () => (
             </div>
         </div>
     </footer>
+);
+
+const AboutPage = ({ navigateTo, user, onLogout }) => (
+  <div className="flex flex-col min-h-screen bg-gray-50">
+    <Header navigateTo={navigateTo} user={user} onLogout={onLogout} />
+    <main className="flex-grow container mx-auto px-6 py-16 text-center">
+      <h1 className="text-4xl font-bold text-blue-600 mb-6">About StayNStray</h1>
+      <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed">
+        StayNStray is a modern travel booking platform designed to make your journeys seamless and enjoyable.
+        Whether you're booking flights, hotels, or trains, we provide a unified, secure, and user-friendly
+        experience for all your travel needs. Our mission is to empower travelers with convenience, transparency,
+        and trust.
+      </p>
+      <p className="text-gray-700 mt-6 max-w-2xl mx-auto leading-relaxed">
+        Founded with a passion for exploration, StayNStray brings together technology and travel — helping you
+        discover destinations, compare prices, and plan your dream trips effortlessly.
+      </p>
+    </main>
+    <Footer navigateTo={navigateTo} />
+  </div>
+);
+
+const ContactPage = ({ navigateTo, user, onLogout }) => (
+  <div className="flex flex-col min-h-screen bg-gray-50">
+    <Header navigateTo={navigateTo} user={user} onLogout={onLogout} />
+    <main className="flex-grow container mx-auto px-6 py-16 text-center">
+      <h1 className="text-4xl font-bold text-blue-600 mb-6">Contact Us</h1>
+      <p className="text-gray-700 mb-8">
+        Have questions or feedback? We’d love to hear from you. Fill out the form and we’ll get back to you soon!
+      </p>
+      <form className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-8 text-left">
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Name</label>
+          <input type="text" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Your Name" required />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Email</label>
+          <input type="email" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com" required />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Message</label>
+          <textarea rows="4" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Your message..." required></textarea>
+        </div>
+        <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
+          Send Message
+        </button>
+      </form>
+    </main>
+    <Footer navigateTo={navigateTo} />
+  </div>
 );
 
 const FormInput = ({ label, name, type = 'text', value, onChange, required, className, placeholder }) => (
