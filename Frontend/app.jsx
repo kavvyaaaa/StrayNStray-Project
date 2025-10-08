@@ -83,7 +83,7 @@ const HomePage = ({ navigateTo, user, onLogout }) => (
       <PopularDestinations />
       <CallToAction navigateTo={navigateTo} />
     </main>
-    <Footer />
+    <Footer navigateTo={navigateTo} />
   </div>
 );
 
@@ -407,7 +407,7 @@ const HotelsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -574,7 +574,7 @@ const FlightsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -666,7 +666,7 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
                     </form>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -715,7 +715,7 @@ const TrainsPage = ({ navigateTo, user, onLogout }) => {
                     </div>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -814,7 +814,7 @@ const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
                      </div>
                 </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -893,7 +893,7 @@ const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
                      <button onClick={() => navigateTo('home')} className="mt-8 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition">Back to Home</button>
                  </div>
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
@@ -951,7 +951,7 @@ const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
                      </div>
                  )}
             </main>
-            <Footer />
+            <Footer navigateTo={navigateTo} />
         </div>
     );
 };
