@@ -24,8 +24,7 @@ StrayNStray is a full-stack travel planning and itinerary web application design
 - Tailwind CSS / Bootstrap – For responsive styling and layout
 
 **Server:**
-- Node.js – JavaScript runtime environment
-- Express.js – Web framework for building the backend API
+- Node.js – JavaScript runtime environment & Web framework for building the backend API
 - MongoDB – NoSQL database for storing users, stays, itineraries, etc.
 - JWT (JSON Web Tokens) – For authentication and authorization
 - Bcrypt.js – For password hashing
@@ -116,4 +115,4 @@ Run script
 - [@Krish-Korat](https://github.com/Krish-Korat)
 - [@kavvyaaaa](https://github.com/kavvyaaaa)
 - [@darp-lalani](https://github.com/darp-lalani)
-- []()
+- [@komal-k25](https://github.com/komal-k25)
