@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 
+/**
+ * StayNStray single-file UI
+ * This file implements a small state-based router and all page components
+ * for the demo frontend UI. Navigation is handled via `currentPage` and
+ * `navigateTo(page, context)`, and auth state persists in localStorage.
+ * Several pages gracefully fall back to mock data if the API is unreachable.
+ */
 // This line now directly points to your live backend server on Render.
 const API_URL = "https://straynstray.onrender.com";
 
-// Main App Component - The root of our application
+/**
+ * Main App component
+ * - Holds global UI state: `currentPage`, `user`, `pageContext`
+ * - Renders the active "page" via a simple switch in `renderPage`
+ * - `navigateTo(page, context)` switches views and optionally carries data
+ */
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [user, setUser] = useState(null);
-  // State to hold context for navigation, e.g., which item to book
+  // Ephemeral data passed between pages (e.g., selected hotel/flight)
   const [pageContext, setPageContext] = useState(null);
 
   useEffect(() => {
@@ -74,6 +86,10 @@ export default function App() {
 // +                         HOME PAGE & COMPONENTS                     +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * HomePage
+ * Landing page composing hero, marketing sections, and a call to action.
+ */
 const HomePage = ({ navigateTo, user, onLogout }) => (
   <div className="flex flex-col min-h-screen">
     <Header navigateTo={navigateTo} user={user} onLogout={onLogout} />
@@ -87,6 +103,10 @@ const HomePage = ({ navigateTo, user, onLogout }) => (
   </div>
 );
 
+/**
+ * HeroSection
+ * Large banner with background image and entry to search flows.
+ */
 const HeroSection = ({ navigateTo }) => (
     <div className="relative bg-gray-900">
         <div className="absolute inset-0">
@@ -101,6 +121,10 @@ const HeroSection = ({ navigateTo }) => (
     </div>
 );
 
+/**
+ * SearchWidget
+ * Tabbed widget that swaps minimal search forms and routes to list pages.
+ */
 const SearchWidget = ({ navigateTo }) => {
     const [activeTab, setActiveTab] = useState('Flights');
 
@@ -156,6 +180,7 @@ const SearchWidget = ({ navigateTo }) => {
     );
 };
 
+/** Simple marketing section highlighting key value props */
 const WhyChooseUs = () => (
     <section className="py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -170,6 +195,7 @@ const WhyChooseUs = () => (
     </section>
 );
 
+/** Presentational card used by marketing sections */
 const FeatureCard = ({ icon, title, description }) => (
     <div className="bg-gray-50 p-8 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300">
         <div className="text-4xl">{icon}</div>
@@ -178,6 +204,7 @@ const FeatureCard = ({ icon, title, description }) => (
     </div>
 );
 
+/** Grid of static destination tiles for visual interest */
 const PopularDestinations = () => (
     <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -193,6 +220,7 @@ const PopularDestinations = () => (
     </section>
 );
 
+/** Visual tile used in PopularDestinations */
 const DestinationCard = ({ name, price, imageUrl }) => (
     <div className="group relative rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
         <img src={imageUrl} alt={name} className="w-full h-80 object-cover"/>
@@ -204,6 +232,7 @@ const DestinationCard = ({ name, price, imageUrl }) => (
     </div>
 );
 
+/** Primary CTA that deep-links into the Hotels flow */
 const CallToAction = ({ navigateTo }) => (
     <section className="bg-blue-600">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-white">
@@ -221,6 +250,10 @@ const CallToAction = ({ navigateTo }) => (
 // +                  AUTHENTICATION PAGE & COMPONENTS                +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * AuthPage
+ * Container that toggles between login and registration forms.
+ */
 const AuthPage = ({ navigateTo, onLoginSuccess }) => {
     const [isLoginView, setIsLoginView] = useState(true);
     const toggleView = () => setIsLoginView(!isLoginView);
@@ -251,6 +284,7 @@ const AuthPage = ({ navigateTo, onLoginSuccess }) => {
     );
 };
 
+/** Handles user login and calls `onLoginSuccess` on success */
 const LoginForm = ({ onLoginSuccess, toggleView }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
@@ -293,6 +327,7 @@ const LoginForm = ({ onLoginSuccess, toggleView }) => {
     );
 };
 
+/** Handles new account creation with simple client-side flow */
 const RegistrationForm = ({ toggleView }) => {
     const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '' });
     const [message, setMessage] = useState('');
@@ -351,6 +386,11 @@ const RegistrationForm = ({ toggleView }) => {
 // +                         HOTELS PAGE & COMPONENTS                 +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * HotelsPage
+ * Lists hotels from the API; falls back to mock data if the request fails
+ * so the UI remains explorable without a backend.
+ */
 const HotelsPage = ({ navigateTo, user, onLogout }) => {
     const [hotels, setHotels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -412,6 +452,7 @@ const HotelsPage = ({ navigateTo, user, onLogout }) => {
     );
 };
 
+/** Card displaying a single hotel with CTA to view details */
 const HotelCard = ({ hotel, onViewDetails }) => (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
         <img src={hotel.imageUrl} alt={hotel.name} className="w-full md:w-80 h-64 md:h-auto object-cover"/>
@@ -445,6 +486,11 @@ const HotelCard = ({ hotel, onViewDetails }) => (
 // +                  HOTEL RESERVATION PAGE & COMPONENTS             +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * HotelReservationPage
+ * Collects guest info and check-in/out dates, then routes to Payment.
+ * Pre-fills contact fields from `user` if available.
+ */
 const HotelReservationPage = ({ navigateTo, user, onLogout, hotel }) => {
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '', phone: '',
@@ -525,6 +571,10 @@ const HotelReservationPage = ({ navigateTo, user, onLogout, hotel }) => {
 // +                       FLIGHTS PAGE & COMPONENTS                  +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * FlightsPage
+ * Fetches and lists available flights; uses mock data if API fails.
+ */
 const FlightsPage = ({ navigateTo, user, onLogout }) => {
     const [flights, setFlights] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -579,6 +629,7 @@ const FlightsPage = ({ navigateTo, user, onLogout }) => {
     );
 };
 
+/** Compact card for a single flight result */
 const FlightCard = ({ flight, onSelect }) => (
     <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 hover:shadow-xl transition-shadow duration-300">
         <div className="w-full sm:w-auto flex items-center gap-4 text-center sm:text-left">
@@ -599,6 +650,11 @@ const FlightCard = ({ flight, onSelect }) => (
 // +                    TRAVELER DETAILS PAGE                         +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * TravelerDetailsPage
+ * Captures passenger details for the selected flight before payment.
+ * Pre-fills from `user` when present.
+ */
 const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
      const [formData, setFormData] = useState({
         title: 'Mr.', firstName: '', lastName: '', dateOfBirth: '', gender: 'Male', nationality: 'United States',
@@ -676,6 +732,10 @@ const TravelerDetailsPage = ({ navigateTo, user, onLogout, flight }) => {
 // +                        TRAINS PAGE & COMPONENTS                  +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * TrainsPage
+ * Demonstrates the same list + card pattern for trains.
+ */
 const TrainsPage = ({ navigateTo, user, onLogout }) => {
     const [trains, setTrains] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -720,6 +780,7 @@ const TrainsPage = ({ navigateTo, user, onLogout }) => {
     );
 };
 
+/** Simple train result card (no booking flow implemented in this demo) */
 const TrainCard = ({ train }) => (
      <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 hover:shadow-xl transition-shadow duration-300">
         <div className="w-full sm:w-auto flex-grow text-center sm:text-left">
@@ -743,6 +804,12 @@ const TrainCard = ({ train }) => (
 // +                         PAYMENT PAGE & COMPONENTS                +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * PaymentPage
+ * Posts the composed `bookingDetails` to the backend and routes to
+ * PaymentSuccess on success. This is a demo form; real payments would
+ * integrate a PCI-compliant provider and never handle raw card data here.
+ */
 const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('');
@@ -819,6 +886,7 @@ const PaymentPage = ({ navigateTo, user, onLogout, bookingDetails }) => {
     );
 };
 
+/** Renders a minimal booking summary for either hotel or flight bookings */
 const BookingSummary = ({ details }) => {
     const isHotel = details.bookingType === 'hotel';
     return (
@@ -849,6 +917,10 @@ const BookingSummary = ({ details }) => {
 // +                      PAYMENT SUCCESS PAGE                        +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * PaymentSuccessPage
+ * Displays confirmation details returned by the backend after payment.
+ */
 const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
      if (!bookingReceipt) {
          return (
@@ -903,6 +975,10 @@ const PaymentSuccessPage = ({ navigateTo, user, onLogout, bookingReceipt }) => {
 // +                         MY BOOKINGS PAGE                         +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * MyBookingsPage
+ * Authenticated view that fetches the user's past bookings.
+ */
 const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -956,6 +1032,7 @@ const MyBookingsPage = ({ navigateTo, user, onLogout }) => {
     );
 };
 
+/** Compact summary of a past booking (hotel or flight) */
 const BookingCard = ({ booking }) => {
     const isHotel = booking.bookingType === 'hotel';
     return (
@@ -982,6 +1059,11 @@ const BookingCard = ({ booking }) => {
 // +                   SHARED GLOBAL COMPONENTS                       +
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * Header
+ * Top navigation; protects "My Bookings" by sending unauthenticated users
+ * to the Auth page instead of the bookings view.
+ */
 const Header = ({ navigateTo, user, onLogout }) => {
     const handleBookingsClick = (e) => {
         e.preventDefault();
@@ -1021,6 +1103,7 @@ const Header = ({ navigateTo, user, onLogout }) => {
     </header>
 );
 };
+/** Site footer with a few static navigation links */
 const Footer = () => (
     <footer className="bg-gray-800 text-white">
         <div className="container mx-auto px-6 lg:px-8 py-12">
@@ -1061,6 +1144,7 @@ const Footer = () => (
     </footer>
 );
 
+/** Reusable labeled input with Tailwind styles */
 const FormInput = ({ label, name, type = 'text', value, onChange, required, className, placeholder }) => (
     <div className={`text-gray-700 ${className}`}>
         <label className="block text-sm font-medium mb-1">{label}{required && ' *'}</label>
