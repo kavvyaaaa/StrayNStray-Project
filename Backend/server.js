@@ -15,24 +15,50 @@ const MONGO_URI = process.env.MONGO_URI;
 // --- Middleware ---
 
 // ** PRODUCTION-READY CORS CONFIGURATION **
-// Allows your local machine and your live Vercel app to connect.
-const allowedOrigins = [
-  'http://localhost:5173', // Your local Vite dev server
-  'https://stray-n-stray-project.vercel.app' // Your live Vercel URL
-];
+// Allows your local machine and your deployed frontend(s) to connect.
+// Configure additional origins via env: FRONTEND_URL and/or ALLOWED_ORIGINS (comma-separated)
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const explicitAllowedOrigins = [
+  'http://localhost:5173', // Local Vite dev server
+  'https://stray-n-stray-project.vercel.app', // Known production URL
+  FRONTEND_URL,
+  ...ALLOWED_ORIGINS
+].filter(Boolean);
+
+function isOriginAllowed(origin) {
+  if (!origin) return true; // allow non-browser clients
+  if (explicitAllowedOrigins.includes(origin)) return true;
+  try {
+    const { hostname } = new URL(origin);
+    // Allow Vercel/Netlify preview deployments by default
+    if (hostname.endsWith('.vercel.app')) return true;
+    if (hostname.endsWith('.netlify.app')) return true;
+  } catch (_) {
+    // fall-through to deny
+  }
+  return false;
+}
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
+  credentials: true,
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+// Ensure preflight requests succeed for all routes
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // --- Middleware to Authenticate JWT ---
